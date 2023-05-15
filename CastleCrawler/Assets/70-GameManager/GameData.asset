@@ -1,0 +1,56 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b5c5246073a104e908f00c0324641d, type: 3}
+  m_Name: GameData
+  m_EditorClassIdentifier: 
+  width: 20
+  height: 20
+  blankTilePreFab: {fileID: 3142403658032675457, guid: 899fc446cbd1fab48a4a63575652e88d, type: 3}
+  moveMgr:
+    directions:
+    - name: N
+      step:
+      - col: 0
+        row: 1
+    - name: S
+      step:
+      - col: 0
+        row: -1
+    - name: E
+      step:
+      - col: 1
+        row: 0
+    - name: W
+      step:
+      - col: -1
+        row: 0
+    moves:
+    - N
+    - S
+    - E
+    - W
+    - NN
+    - SS
+    - EE
+    - WW
+    - NE
+    - NW
+    - SE
+    - SW
+    - NNE
+    - NNW
+    - SSE
+    - SSW
+    - EEN
+    - EES
+    - WWN
+    - WWS
