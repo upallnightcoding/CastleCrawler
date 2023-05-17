@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 20
   height: 20
-  blankTilePreFab: {fileID: 3142403658032675457, guid: 899fc446cbd1fab48a4a63575652e88d, type: 3}
+  gameTilePreFab: {fileID: 3142403658032675457, guid: 899fc446cbd1fab48a4a63575652e88d, type: 3}
   moveMgr:
     directions:
     - name: N

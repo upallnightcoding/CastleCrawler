@@ -10,7 +10,7 @@ public class GameData : ScriptableObject
     public int height;
 
     [Header("Game PreFabs")]
-    public GameObject blankTilePreFab;
+    public GameObject gameTilePreFab;
 
     [Header("Moves")]
     public MoveMgr moveMgr;
