@@ -11,6 +11,8 @@ public class GameData : ScriptableObject
 
     [Header("Game PreFabs")]
     public GameObject gameTilePreFab;
+    public GameObject knightsPreFab;
+    public GameObject castlePreFab;
 
     [Header("Moves")]
     public MoveMgr moveMgr;

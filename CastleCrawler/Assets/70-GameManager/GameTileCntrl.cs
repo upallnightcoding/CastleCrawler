@@ -7,7 +7,7 @@ public class GameTileCntrl : MonoBehaviour
     private TileState state = TileState.OPEN;
 
     public bool IsOpen() => state == TileState.OPEN;
-    public void MakeAsVisited() => state = TileState.VISTED;
+    public void MarkAsVisited() => state = TileState.VISTED;
 
     public void SetMaterial(Material material)
     {
