@@ -14,6 +14,8 @@ public class GameData : ScriptableObject
     public GameObject knightsPreFab;
     public GameObject castlePreFab;
 
+    public Sprite[] gameColors;
+
     [Header("Moves")]
     public MoveMgr moveMgr;
 }
