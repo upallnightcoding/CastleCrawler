@@ -11,7 +11,7 @@ public class GameTileCntrl : MonoBehaviour
 
     public void SetMaterial(Material material)
     {
-        GetComponent<Renderer>().material = material;
+        transform.GetChild(0).GetComponent<Renderer>().material = material;
     }
 
     public Vector3 GetPosition() 

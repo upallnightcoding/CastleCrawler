@@ -4,15 +4,19 @@ using UnityEngine;
 
 public class GameManager : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    [SerializeField] private UICntrl uiCntrl;
+    [SerializeField] private BoardCntrl boardCntrl;
 
-    // Update is called once per frame
-    void Update()
+    public static GameManager Instance { get; set; }
+
+    public void AddDirBtnCnt(string direction) => uiCntrl.AddDirBtnCnt(direction);
+
+    public void CreateDirBtns() => uiCntrl.CreateDirBtns();
+
+    public void PlayersMove(string move) => boardCntrl.PlayersMove(move);
+
+    private void Awake() 
     {
-        
+        Instance = this;    
     }
 }
