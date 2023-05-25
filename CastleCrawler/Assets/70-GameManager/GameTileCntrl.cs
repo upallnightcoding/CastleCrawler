@@ -7,7 +7,7 @@ public class GameTileCntrl : MonoBehaviour
     private TileState state = TileState.OPEN;
 
     public bool IsOpen() => state == TileState.OPEN;
-    public void MarkAsVisited() => state = TileState.VISTED;
+    public void MarkAsPath() => state = TileState.PATH;
 
     public void SetMaterial(Material material)
     {
@@ -22,6 +22,6 @@ public class GameTileCntrl : MonoBehaviour
     private enum TileState 
     {
         OPEN,
-        VISTED
+        PATH
     }
 }

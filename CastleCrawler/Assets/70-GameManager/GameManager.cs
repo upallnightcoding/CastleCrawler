@@ -11,6 +11,9 @@ public class GameManager : MonoBehaviour
 
     public void AddDirBtnCnt(string direction) => uiCntrl.AddDirBtnCnt(direction);
 
+    public void DisplayMsg(string title, string message, string buttonTxt) => 
+        uiCntrl.DisplayMsg(title, message, buttonTxt);
+
     public void CreateDirBtns() => uiCntrl.CreateDirBtns();
 
     public void PlayersMove(string move) => boardCntrl.PlayersMove(move);

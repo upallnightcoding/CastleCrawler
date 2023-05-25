@@ -6,14 +6,18 @@ public class BoardCntrl : MonoBehaviour
 {
     [SerializeField] private GameData gameData;
     [SerializeField] private Transform boardParent;
-    [SerializeField] private Material whiteMaterial;
+    [SerializeField] private Material markedMaterial;
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material[] stepMaterials;
+    [SerializeField] private Material startingPointMaterial;
+    [SerializeField] private Material endPointMaterial;
 
     private int width;
     private int height;
 
     private int level = 6;
+
+    private bool mapSw = false;
 
     private GameTileCntrl[,] gameBoard = null;
 
@@ -26,6 +30,8 @@ public class BoardCntrl : MonoBehaviour
     private TileColRow startingPoint;
     private TileColRow activeColRow;
     private TileColRow prevColRow;
+
+    private int GetRandom(int n) => Random.Range(0, n);
 
     // Start is called before the first frame update
     void Start()
@@ -44,9 +50,11 @@ public class BoardCntrl : MonoBehaviour
 
     public void PlayersMove(string move) 
     {
+        bool goodMove = true;
+        Stack<GameTileCntrl> moveStack = new Stack<GameTileCntrl>();
         colorSwitch = 1 - colorSwitch;
 
-        for (int i = 0; i < move.Length; i++)
+        for (int i = 0; (i < move.Length) && goodMove; i++)
         {
             Step step = moveMgr.GetStep(move.Substring(i, 1));
 
@@ -56,13 +64,29 @@ public class BoardCntrl : MonoBehaviour
 
              if (tile != null) 
              {
-                tile.SetMaterial(stepMaterials[colorSwitch]);
+                if (tile.IsOpen()) 
+                {
+                    tile.SetMaterial(stepMaterials[colorSwitch]);
+                    moveStack.Push(tile);
+                } else {
+                    GameManager.Instance.DisplayMsg("Sorry", "Tile is already occupied.", "Ok");
+                    goodMove = false;    
+                }
+             } else {
+                GameManager.Instance.DisplayMsg("Sorry", "That move takes you off the board.", "Ok");
+                goodMove = false;
              }
         }
 
-        prevColRow = activeColRow;
-
-        CreateStep(activeColRow, ++moveCount);
+        if (goodMove) {
+            prevColRow = activeColRow;
+            CreateStepTile(activeColRow, ++moveCount);
+        } else {
+            foreach(GameTileCntrl tile in moveStack) 
+            {
+                tile.SetMaterial(markedMaterial);
+            }
+        }
     }
 
     private void CreatePuzzle()
@@ -77,7 +101,10 @@ public class BoardCntrl : MonoBehaviour
 
         TileColRow point = new TileColRow(startingPoint);
 
-        CreateStep(startingPoint, moveCount);
+        CreateStepTile(startingPoint, moveCount);
+
+        GameTileCntrl startingTile = GetTileCntrl(startingPoint); 
+        startingTile.MarkAsPath();
         
         while((numberOfMoves < level) && (tries++ < 20))
         {
@@ -112,8 +139,8 @@ public class BoardCntrl : MonoBehaviour
                 while (stepQueue.Count != 0)
                 {
                     GameTileCntrl tileCntrl = stepQueue.Dequeue();
-                    tileCntrl.MarkAsVisited();
-                    tileCntrl.SetMaterial(whiteMaterial);
+                    tileCntrl.MarkAsPath();
+                    tileCntrl.SetMaterial(markedMaterial);
                 }
             } else {
                 point = moveStartPoint;
@@ -123,23 +150,24 @@ public class BoardCntrl : MonoBehaviour
         GameManager.Instance.CreateDirBtns();
 
         GameObject go = Instantiate(gameData.castlePreFab, lastTile.GetPosition(), Quaternion.identity);
+        lastTile.SetMaterial(endPointMaterial);
     }
 
-    private void CreateStep(TileColRow point, int step)
+    private void CreateStepTile(TileColRow point, int step)
     {
         GameObject go = Instantiate(gameData.stepNumber, point.GetPosition(), Quaternion.identity);
-        StepNumberCntrl cntrl = go.GetComponent<StepNumberCntrl>();
-        cntrl.SetActive(step);
+        StepNumberCntrl stepNumberCntrl = go.GetComponent<StepNumberCntrl>();
+        stepNumberCntrl.SetActive(step);
     }
 
-     private TileColRow GetStartingPoint()
+    private TileColRow GetStartingPoint()
     {
         int col = width / 2;
         int row = height / 2;
 
         TileColRow startingPoint = new TileColRow(col, row);
         GameTileCntrl tileCntrl = GetTileCntrl(startingPoint); 
-        Destroy(tileCntrl.gameObject);
+        tileCntrl.SetMaterial(startingPointMaterial);
 
         return(startingPoint);
     }
@@ -159,30 +187,27 @@ public class BoardCntrl : MonoBehaviour
 
     private GameTileCntrl CreateTile(GameObject preFab, int col, int row)
     {
-        //Vector3 position = new Vector3(col * 5.0f, 0.0f, row * 5.0f);
-
         TileColRow point = new TileColRow(col, row);
 
         GameObject go = Instantiate(preFab, point.GetPosition(), Quaternion.identity);
         go.transform.parent = boardParent;
 
         GameTileCntrl tileCntrl = go.transform.GetComponent<GameTileCntrl>();
-        Debug.Log($"Tile Cntrl: {tileCntrl}");
 
         gameBoard[col, row] = tileCntrl;
 
         return(tileCntrl);
     }
 
-    private void SetColor(TileColRow colRow, Material material)
-    {
-        GameTileCntrl tileCntrl = GetTileCntrl(colRow);
+    // private void SetColor(TileColRow colRow, Material material)
+    // {
+    //     GameTileCntrl tileCntrl = GetTileCntrl(colRow);
 
-        if (tileCntrl != null)
-        {
-            tileCntrl.SetMaterial(material);
-        }
-    }
+    //     if (tileCntrl != null)
+    //     {
+    //         tileCntrl.SetMaterial(material);
+    //     }
+    // }
 
     private GameTileCntrl GetTileCntrl(TileColRow colRow) 
     {
@@ -201,11 +226,6 @@ public class BoardCntrl : MonoBehaviour
     private TileColRow GetRandomTile()
     {
         return(new TileColRow(GetRandom(width), GetRandom(height)));
-    }
-
-    private int GetRandom(int n)
-    {
-        return(Random.Range(0, n));
     }
 
     private class TileColRow
