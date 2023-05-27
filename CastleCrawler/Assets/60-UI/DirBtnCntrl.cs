@@ -8,14 +8,28 @@ public class DirBtnCntrl : MonoBehaviour
 {
     [SerializeField] private TMP_Text directionTxt;
     [SerializeField] private TMP_Text countTxt;
+    [SerializeField] private Sprite buttonDisabled;
 
     private int selectCount = 0;
+    private Sprite originalSprite;
+    private bool disableButton = false;
 
-    public void PlayersMove() 
+    public void OnPlayersMove() 
     {
-        GameManager.Instance.PlayersMove(directionTxt.text);
+        if (!disableButton)
+        {
+            GameManager.Instance.OnPlayersMove(directionTxt.text);
 
-        countTxt.text = (--selectCount).ToString();
+            countTxt.text = (--selectCount).ToString();
+
+            if (selectCount == 0) 
+            {
+                GetComponent<Image>().sprite = buttonDisabled;    
+                disableButton = true;
+            }
+        } else {
+            GameManager.Instance.DisplayMsg("Sorry", "No more turns for this move.", "Ok");
+        }
     }
 
     public void Initialize(string direction, Sprite sprite, int count) 
@@ -25,6 +39,9 @@ public class DirBtnCntrl : MonoBehaviour
 
         // Set the sprite of the button image
         GetComponent<Image>().sprite = sprite;
+
+        // Cash the original sprite
+        originalSprite = sprite;
 
         // Initialize the count of this direction
         countTxt.text = count.ToString();

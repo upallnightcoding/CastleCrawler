@@ -9,6 +9,8 @@ public class GameData : ScriptableObject
     public int width;
     public int height;
 
+    public int level;
+
     [Header("Game PreFabs")]
     public GameObject gameTilePreFab;
     public GameObject castlePreFab;

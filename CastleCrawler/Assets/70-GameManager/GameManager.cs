@@ -7,19 +7,25 @@ public class GameManager : MonoBehaviour
     [SerializeField] private UICntrl uiCntrl;
     [SerializeField] private BoardCntrl boardCntrl;
 
-    public static GameManager Instance { get; set; }
 
-    public void AddDirBtnCnt(string direction) => uiCntrl.AddDirBtnCnt(direction);
-
-    public void DisplayMsg(string title, string message, string buttonTxt) => 
+    public void DisplayMsg(string title, string message, string buttonTxt)
+    {
         uiCntrl.DisplayMsg(title, message, buttonTxt);
-
-    public void CreateDirBtns() => uiCntrl.CreateDirBtns();
-
-    public void PlayersMove(string move) => boardCntrl.PlayersMove(move);
+    }
 
     private void Awake() 
     {
         Instance = this;    
     }
+
+    public void SetLevel(int level) => uiCntrl.SetLevel(level);
+
+    public static GameManager Instance { get; set; }
+
+    public void AddDirBtnCnt(string direction) => uiCntrl.AddDirBtnCnt(direction);
+
+    public void CreateDirBtns() => uiCntrl.CreateDirBtns();
+
+    public void OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
+
 }

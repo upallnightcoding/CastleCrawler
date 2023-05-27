@@ -511,7 +511,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 165309704601448872}
         m_TargetAssemblyTypeName: DirBtnCntrl, Assembly-CSharp
-        m_MethodName: PlayersMove
+        m_MethodName: OnPlayersMove
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -535,3 +535,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   directionTxt: {fileID: 5997486483371363854}
   countTxt: {fileID: 1062290115325231087}
+  buttonDisabled: {fileID: 21300000, guid: 23d2f9d15f15a43c5bf2c57de1a27879, type: 3}

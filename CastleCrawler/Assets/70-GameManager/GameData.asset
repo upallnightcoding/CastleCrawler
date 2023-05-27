@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   width: 10
   height: 10
+  level: 3
   gameTilePreFab: {fileID: 3142403658032675457, guid: 899fc446cbd1fab48a4a63575652e88d, type: 3}
-  knightsPreFab: {fileID: 7414019648756888363, guid: 885f6a4658b651d4cadf1c14477bd095, type: 3}
   castlePreFab: {fileID: 2247280935173296445, guid: 80b1e39fac58a8f4a87ab6544bd8c429, type: 3}
   gameColors:
   - {fileID: 21300000, guid: 6bbcba4e267be464998897741b81d508, type: 3}

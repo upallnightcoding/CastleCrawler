@@ -15,7 +15,7 @@ public class BoardCntrl : MonoBehaviour
     private int width;
     private int height;
 
-    private int level = 6;
+    private int level;
 
     private bool mapSw = false;
 
@@ -38,6 +38,7 @@ public class BoardCntrl : MonoBehaviour
     {
         width = gameData.width;
         height = gameData.height;
+        level = gameData.level;
 
         gameBoard = new GameTileCntrl[width, height];
 
@@ -46,6 +47,8 @@ public class BoardCntrl : MonoBehaviour
         DrawBoard();
 
         CreatePuzzle();
+
+        GameManager.Instance.SetLevel(level);
     }
 
     public void PlayersMove(string move) 
@@ -64,9 +67,10 @@ public class BoardCntrl : MonoBehaviour
 
              if (tile != null) 
              {
-                if (tile.IsOpen()) 
+                if (tile.OpenForTracking()) 
                 {
                     tile.SetMaterial(stepMaterials[colorSwitch]);
+                    tile.SetAsTracked();
                     moveStack.Push(tile);
                 } else {
                     GameManager.Instance.DisplayMsg("Sorry", "Tile is already occupied.", "Ok");
@@ -104,7 +108,9 @@ public class BoardCntrl : MonoBehaviour
         CreateStepTile(startingPoint, moveCount);
 
         GameTileCntrl startingTile = GetTileCntrl(startingPoint); 
-        startingTile.MarkAsPath();
+        startingTile.SetAsMappedPath();
+
+        Debug.Log($"Level {level}");
         
         while((numberOfMoves < level) && (tries++ < 20))
         {
@@ -121,7 +127,7 @@ public class BoardCntrl : MonoBehaviour
 
                 GameTileCntrl tileCntrl = GetTileCntrl(point); 
 
-                if ((tileCntrl != null) && (tileCntrl.IsOpen()))
+                if ((tileCntrl != null) && (tileCntrl.OpenForMapping()))
                 {
                     stepQueue.Enqueue(tileCntrl);
                     lastTile = tileCntrl;
@@ -139,7 +145,7 @@ public class BoardCntrl : MonoBehaviour
                 while (stepQueue.Count != 0)
                 {
                     GameTileCntrl tileCntrl = stepQueue.Dequeue();
-                    tileCntrl.MarkAsPath();
+                    tileCntrl.SetAsMappedPath();
                     tileCntrl.SetMaterial(markedMaterial);
                 }
             } else {
@@ -148,6 +154,9 @@ public class BoardCntrl : MonoBehaviour
         }
 
         GameManager.Instance.CreateDirBtns();
+
+        Debug.Log($"Castle {gameData.castlePreFab}");
+        Debug.Log($"Last Tile {lastTile.GetPosition()}");
 
         GameObject go = Instantiate(gameData.castlePreFab, lastTile.GetPosition(), Quaternion.identity);
         lastTile.SetMaterial(endPointMaterial);

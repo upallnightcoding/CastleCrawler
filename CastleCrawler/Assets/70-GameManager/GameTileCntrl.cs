@@ -6,22 +6,22 @@ public class GameTileCntrl : MonoBehaviour
 {
     private TileState state = TileState.OPEN;
 
-    public bool IsOpen() => state == TileState.OPEN;
-    public void MarkAsPath() => state = TileState.PATH;
+    public bool OpenForMapping() => (state == TileState.OPEN);
+    public void SetAsMappedPath() => state = TileState.MAPPED;
+    public bool OpenForTracking() => (state == TileState.OPEN) || (state == TileState.MAPPED);
+    public void SetAsTracked() => state = TileState.TRACKED;
+
+    public Vector3 GetPosition() => gameObject.transform.position;
 
     public void SetMaterial(Material material)
     {
         transform.GetChild(0).GetComponent<Renderer>().material = material;
     }
 
-    public Vector3 GetPosition() 
-    {
-        return(gameObject.transform.position);
-    }
-
     private enum TileState 
     {
         OPEN,
-        PATH
+        MAPPED,
+        TRACKED
     }
 }
