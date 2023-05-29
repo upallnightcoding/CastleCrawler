@@ -8,43 +8,51 @@ public class DirBtnMgr : MonoBehaviour
     [SerializeField] private GameData gameData;
     [SerializeField] private Transform parent;
 
-    private Dictionary<string, int> dirBtnCnt = null;
-    private List<string> dirList = null;
+    private Dictionary<string, int> dirBtnCntDict = null;
+    private List<string> moveList = null;
+    private Dictionary<string, DirBtnCntrl> btnCntrlsDict = null;
 
     private void Awake() 
     {
-        dirList = new List<string>();
-        dirBtnCnt = new Dictionary<string, int>();
+        moveList = new List<string>();
+        dirBtnCntDict = new Dictionary<string, int>();
+        btnCntrlsDict = new Dictionary<string, DirBtnCntrl>();
     }
 
     public void AddDirBtnCnt(string direction)
     {
-        int count = 0; 
-
-        if (dirBtnCnt.TryGetValue(direction, out count))
+        if (dirBtnCntDict.TryGetValue(direction, out int count))
         {
-            dirBtnCnt[direction] = ++count;
+            dirBtnCntDict[direction] = ++count;
         } 
         else 
         {
-            dirBtnCnt[direction] = ++count;
-            dirList.Add(direction);
+            dirBtnCntDict[direction] = ++count;
+            moveList.Add(direction);
+        }
+    }
+
+    public void Undo(string move)
+    {
+        if (btnCntrlsDict.TryGetValue(move, out DirBtnCntrl button))
+        {
+            button.Undo();
         }
     }
 
     public void CreateDirBtns()
     {
-        int count = 0;
         int color = 0;
 
-        foreach(string direction in dirList)
+        foreach(string move in moveList)
         {
             GameObject go = Instantiate(buttonColorPreFab, parent);
-            DirBtnCntrl btnCntrl = go.GetComponent<DirBtnCntrl>();
+            DirBtnCntrl button = go.GetComponent<DirBtnCntrl>();
 
-            if (dirBtnCnt.TryGetValue(direction, out count))
+            if (dirBtnCntDict.TryGetValue(move, out int count))
             {
-                btnCntrl.Initialize(direction, gameData.gameColors[color++], count);
+                button.Initialize(move, gameData.gameColors[color++], count);
+                btnCntrlsDict[move] = button;
             }       
         }
     }

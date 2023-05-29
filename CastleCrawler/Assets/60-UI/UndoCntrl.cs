@@ -6,6 +6,6 @@ public class UndoCntrl : MonoBehaviour
 {
     public void OnUndo()
     {
-        Debug.Log("Undo Button Selected ...");
+        GameManager.Instance.OnUndo();
     }
 }

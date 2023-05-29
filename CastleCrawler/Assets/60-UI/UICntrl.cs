@@ -7,16 +7,18 @@ public class UICntrl : MonoBehaviour
     [SerializeField] private DirBtnMgr dirBtnMgr;
     [SerializeField] private MsgDialogCntrl msgDialogCntrl;
     [SerializeField] private LevelCntrl levelCntrl;
+    [SerializeField] private UndoCntrl undoCntrl;
 
     public void DisplayMsg(string title, string message, string buttonTxt) 
     {
         msgDialogCntrl.Display(title, message, buttonTxt);
     }
 
+    public void Undo(string move) => dirBtnMgr.Undo(move);
+
     public void AddDirBtnCnt(string direction) => dirBtnMgr.AddDirBtnCnt(direction);
 
     public void CreateDirBtns() => dirBtnMgr.CreateDirBtns();
 
     public void SetLevel(int level) => levelCntrl.SetLevel(level);
-
 }

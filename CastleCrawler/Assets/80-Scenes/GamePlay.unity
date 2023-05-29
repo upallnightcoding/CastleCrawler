@@ -514,7 +514,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 7522061699150281, guid: e62714fc09fab3041ba862be732797d3, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 7522061699150281, guid: e62714fc09fab3041ba862be732797d3, type: 3}
       propertyPath: m_AnchorMax.x
@@ -868,6 +868,7 @@ MonoBehaviour:
   dirBtnMgr: {fileID: 242932033}
   msgDialogCntrl: {fileID: 1739725303}
   levelCntrl: {fileID: 69911224}
+  undoCntrl: {fileID: 3913337773078370000}
 --- !u!1 &1772533331
 GameObject:
   m_ObjectHideFlags: 0

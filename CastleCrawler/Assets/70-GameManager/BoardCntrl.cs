@@ -9,8 +9,8 @@ public class BoardCntrl : MonoBehaviour
     [SerializeField] private Material markedMaterial;
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material[] stepMaterials;
-    [SerializeField] private Material startingPointMaterial;
-    [SerializeField] private Material endPointMaterial;
+    //[SerializeField] private Material startingPointMaterial;
+    //[SerializeField] private Material endPointMaterial;
 
     private int width;
     private int height;
@@ -19,19 +19,21 @@ public class BoardCntrl : MonoBehaviour
 
     private bool mapSw = false;
 
-    private GameTileCntrl[,] gameBoard = null;
+    private GameBoard gameBoard = null;
 
     private MoveMgr moveMgr = null;
 
     private int colorSwitch = 0;
-    private int moveCount = 0;
+    private int moveStep = 0;
 
     private GameTileCntrl lastTile;
-    private TileColRow startingPoint;
-    private TileColRow activeColRow;
-    private TileColRow prevColRow;
+    private GameTileCntrl startingTile;
+    private TileColRow currentTile;
+    private GameTileCntrl prevTile;
 
     private int GetRandom(int n) => Random.Range(0, n);
+
+    private Stack<Stack<GameTileCntrl>> playersMoves = null;
 
     // Start is called before the first frame update
     void Start()
@@ -40,56 +42,91 @@ public class BoardCntrl : MonoBehaviour
         height = gameData.height;
         level = gameData.level;
 
-        gameBoard = new GameTileCntrl[width, height];
+        gameBoard = new GameBoard(gameData, boardParent, width, height);
+
+        playersMoves = new Stack<Stack<GameTileCntrl>>();
 
         moveMgr = gameData.moveMgr;
-
-        DrawBoard();
 
         CreatePuzzle();
 
         GameManager.Instance.SetLevel(level);
     }
 
-    public void PlayersMove(string move) 
+    public bool PlayersMove(string move) 
     {
-        bool goodMove = true;
         Stack<GameTileCntrl> moveStack = new Stack<GameTileCntrl>();
+        TileColRow startMove = new TileColRow(currentTile);
+        string errorMsg = "";
+        bool goodMove = true;
+
         colorSwitch = 1 - colorSwitch;
 
         for (int i = 0; (i < move.Length) && goodMove; i++)
-        {
+        {             
             Step step = moveMgr.GetStep(move.Substring(i, 1));
 
-            activeColRow.Add(step);
+            currentTile.Add(step);
 
-             GameTileCntrl tile = GetTileCntrl(activeColRow); 
+            GameTileCntrl activeTile = gameBoard.GetTileCntrl(currentTile);
 
-             if (tile != null) 
-             {
-                if (tile.OpenForTracking()) 
+            if (activeTile != null)
+            {
+                if (activeTile.OpenForTracking())
                 {
-                    tile.SetMaterial(stepMaterials[colorSwitch]);
-                    tile.SetAsTracked();
-                    moveStack.Push(tile);
-                } else {
-                    GameManager.Instance.DisplayMsg("Sorry", "Tile is already occupied.", "Ok");
-                    goodMove = false;    
+                    activeTile.SetMaterial(stepMaterials[colorSwitch]);
+                    activeTile.SetAsTracked();
+                    moveStack.Push(activeTile);
                 }
-             } else {
-                GameManager.Instance.DisplayMsg("Sorry", "That move takes you off the board.", "Ok");
+                else
+                { 
+                    errorMsg = "Tile is already occupied.";
+                    goodMove = false;
+                }
+            }
+            else
+            {
+                errorMsg = "That move takes you off the board.";
                 goodMove = false;
-             }
+            }
         }
 
         if (goodMove) {
-            prevColRow = activeColRow;
-            CreateStepTile(activeColRow, ++moveCount);
+            prevTile = gameBoard.GetTileCntrl(currentTile);
+            prevTile.CreateStepTile(++moveStep);
+            playersMoves.Push(moveStack);
         } else {
-            foreach(GameTileCntrl tile in moveStack) 
+            GameManager.Instance.DisplayMsg("Sorry", errorMsg, "Ok");
+            currentTile = startMove;
+
+            foreach (GameTileCntrl tile in moveStack) 
             {
                 tile.SetMaterial(markedMaterial);
             }
+        }
+
+        return (goodMove);                
+    }
+
+    public void UnDoLastMove()
+    {
+        GameTileCntrl firstTile = null;
+
+        if (playersMoves.Count > 0)
+        {
+            Stack<GameTileCntrl> move = playersMoves.Pop();
+
+            foreach(GameTileCntrl tile in move)
+            {
+                if (firstTile == null)
+                {
+                    firstTile = tile;
+                } 
+
+                tile.SetMaterial(markedMaterial);
+            }
+
+            firstTile.RemoveStepTile();         
         }
     }
 
@@ -98,17 +135,17 @@ public class BoardCntrl : MonoBehaviour
         int numberOfMoves = 0;
         int tries = 0;
         
-        startingPoint = GetStartingPoint();
-        activeColRow = new TileColRow(startingPoint);
-        prevColRow = new TileColRow(startingPoint);
+        startingTile = GetStartingPoint();
+        startingTile.CreateStepTile(moveStep);
+        prevTile = startingTile;
         lastTile = null;
 
-        TileColRow point = new TileColRow(startingPoint);
+        currentTile = startingTile.GetColRow();
 
-        CreateStepTile(startingPoint, moveCount);
+        TileColRow point = startingTile.GetColRow();
 
-        GameTileCntrl startingTile = GetTileCntrl(startingPoint); 
-        startingTile.SetAsMappedPath();
+        GameTileCntrl firstMoveTile = startingTile;         
+        firstMoveTile.SetAsMappedPath();
 
         Debug.Log($"Level {level}");
         
@@ -125,7 +162,7 @@ public class BoardCntrl : MonoBehaviour
             {
                 point.Add(moveMgr.GetStep(move.Substring(i, 1)));
 
-                GameTileCntrl tileCntrl = GetTileCntrl(point); 
+                GameTileCntrl tileCntrl = gameBoard.GetTileCntrl(point); 
 
                 if ((tileCntrl != null) && (tileCntrl.OpenForMapping()))
                 {
@@ -145,8 +182,7 @@ public class BoardCntrl : MonoBehaviour
                 while (stepQueue.Count != 0)
                 {
                     GameTileCntrl tileCntrl = stepQueue.Dequeue();
-                    tileCntrl.SetAsMappedPath();
-                    tileCntrl.SetMaterial(markedMaterial);
+                    tileCntrl.CreateMappedTile();
                 }
             } else {
                 point = moveStartPoint;
@@ -158,117 +194,130 @@ public class BoardCntrl : MonoBehaviour
         Debug.Log($"Castle {gameData.castlePreFab}");
         Debug.Log($"Last Tile {lastTile.GetPosition()}");
 
-        GameObject go = Instantiate(gameData.castlePreFab, lastTile.GetPosition(), Quaternion.identity);
-        lastTile.SetMaterial(endPointMaterial);
+        lastTile.CreateCastleTile();
     }
 
-    private void CreateStepTile(TileColRow point, int step)
+    private GameTileCntrl GetStartingPoint()
     {
-        GameObject go = Instantiate(gameData.stepNumber, point.GetPosition(), Quaternion.identity);
-        StepNumberCntrl stepNumberCntrl = go.GetComponent<StepNumberCntrl>();
-        stepNumberCntrl.SetActive(step);
-    }
+        TileColRow colRow = new TileColRow(width / 2, height / 2);
 
-    private TileColRow GetStartingPoint()
-    {
-        int col = width / 2;
-        int row = height / 2;
-
-        TileColRow startingPoint = new TileColRow(col, row);
-        GameTileCntrl tileCntrl = GetTileCntrl(startingPoint); 
-        tileCntrl.SetMaterial(startingPointMaterial);
-
-        return(startingPoint);
-    }
-
-    private void DrawBoard()
-    {
-        GameObject gameTilePreFab = gameData.gameTilePreFab;
-
-        for (int col = 0; col < width; col++) 
-        {
-            for (int row = 0; row < height; row++)
-            {
-                CreateTile(gameTilePreFab, col, row);
-            }
-        }
-    }
-
-    private GameTileCntrl CreateTile(GameObject preFab, int col, int row)
-    {
-        TileColRow point = new TileColRow(col, row);
-
-        GameObject go = Instantiate(preFab, point.GetPosition(), Quaternion.identity);
-        go.transform.parent = boardParent;
-
-        GameTileCntrl tileCntrl = go.transform.GetComponent<GameTileCntrl>();
-
-        gameBoard[col, row] = tileCntrl;
+        GameTileCntrl tileCntrl = gameBoard.GetTileCntrl(colRow); 
+        tileCntrl.CreateStartingPointTile();
 
         return(tileCntrl);
     }
 
-    // private void SetColor(TileColRow colRow, Material material)
-    // {
-    //     GameTileCntrl tileCntrl = GetTileCntrl(colRow);
-
-    //     if (tileCntrl != null)
-    //     {
-    //         tileCntrl.SetMaterial(material);
-    //     }
-    // }
-
-    private GameTileCntrl GetTileCntrl(TileColRow colRow) 
+    private class TrackMove
     {
-        GameTileCntrl cntrl = null;
-        int col = colRow.Col;
-        int row = colRow.Row;
+        public Stack<GameTileCntrl> MoveStack { set; get; }
+        public string Move { set; get; }
 
-        if ((col >= 0) && (col < width) && (row >= 0) && (row < height))
+        public TrackMove(string move, Stack<GameTileCntrl> moveStack)
         {
-            cntrl = gameBoard[col, row];
+            this.Move = move;
+            this.MoveStack = moveStack;
         }
-
-        return(cntrl);
     }
 
-    private TileColRow GetRandomTile()
+    private class GameBoard
     {
-        return(new TileColRow(GetRandom(width), GetRandom(height)));
+        private GameData gameData;
+
+        private int width;
+        private int height;
+
+        private GameObject gameTilePreFab;
+
+        private float tileSpacing;
+
+        private Transform parent;
+
+        private GameTileCntrl[,] gameBoard = null;
+
+        public GameBoard(GameData gameData, Transform parent, int width, int height)
+        {
+            this.gameData = gameData;
+            this.width = gameData.width;
+            this.height = gameData.height;
+            this.tileSpacing = gameData.tileSpacing;
+            this.gameTilePreFab = gameData.gameTilePreFab;
+            this.parent = parent;
+
+            gameBoard = new GameTileCntrl[width, height];
+
+            CreateGameBoard();
+        }
+
+        private void CreateGameBoard()
+        {
+            for (int col = 0; col < width; col++) 
+            {
+                for (int row = 0; row < height; row++)
+                {
+                    gameBoard[col, row] = CreateGameTile(col, row);
+                }
+            }
+        }
+
+        public GameTileCntrl GetTileCntrl(TileColRow colRow)
+        {
+            int col = colRow.Col;
+            int row = colRow.Row;
+            GameTileCntrl cntrl = null;
+
+            if ((col >= 0) && (col < width) && (row >= 0) && (row < height))
+            {
+                cntrl = gameBoard[col, row];
+            }
+
+            return(cntrl);
+        }
+
+        private GameTileCntrl CreateGameTile(int col, int row)
+        {
+            Vector3 position = new Vector3(col * tileSpacing, 0.0f, row * tileSpacing);
+
+            GameObject go = Instantiate(gameTilePreFab, position, Quaternion.identity);
+            go.transform.parent = parent;
+
+            GameTileCntrl tileCntrl = go.transform.GetComponent<GameTileCntrl>();
+            tileCntrl.SetColRow(col, row);
+
+            return(tileCntrl);
+        }
+    } 
+}
+
+public class TileColRow
+{
+    public int Col { get; set; }
+    public int Row { get; set; }
+
+    public TileColRow(int col, int row)
+    {
+        this.Col = col;
+        this.Row = row;
     }
 
-    private class TileColRow
+    public Vector3 GetPosition() 
     {
-        public int Col { get; set; }
-        public int Row { get; set; }
-
-        public TileColRow(int col, int row)
-        {
-            this.Col = col;
-            this.Row = row;
-        }
-
-        public Vector3 GetPosition() 
-        {
-            return(new Vector3(Col * 5.0f, 0.0f, Row * 5.0f));
-        }
-
-        public TileColRow(TileColRow colRow)
-        {
-            Col = colRow.Col;
-            Row = colRow.Row;
-        }
-
-        public void Add(Step step)
-        {
-            Col += step.Col;
-            Row += step.Row;
-        }
-
-        public void PrintIt(string msg)
-        {
-            Debug.Log($"{msg} - Tile ColRow: ({Col},{Row})");
-        }
+        return(new Vector3(Col * 5.0f, 0.0f, Row * 5.0f));
     }
-    
+
+    public TileColRow(TileColRow colRow)
+    {
+        Col = colRow.Col;
+        Row = colRow.Row;
+    }
+
+    public void Add(Step step)
+    {
+        Col += step.Col;
+        Row += step.Row;
+    }
+
+    public void PrintIt(string msg)
+    {
+        Debug.Log($"{msg} - Tile ColRow: ({Col},{Row})");
+    }
 }

@@ -18,6 +18,8 @@ public class GameManager : MonoBehaviour
         Instance = this;    
     }
 
+    public void Undo(string move) => uiCntrl.Undo(move);
+
     public void SetLevel(int level) => uiCntrl.SetLevel(level);
 
     public static GameManager Instance { get; set; }
@@ -26,6 +28,7 @@ public class GameManager : MonoBehaviour
 
     public void CreateDirBtns() => uiCntrl.CreateDirBtns();
 
-    public void OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
+    public bool OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
 
+    public void OnUndo() => boardCntrl.UnDoLastMove();
 }

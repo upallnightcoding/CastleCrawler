@@ -9,6 +9,8 @@ public class GameData : ScriptableObject
     public int width;
     public int height;
 
+    public float tileSpacing;
+
     public int level;
 
     [Header("Game PreFabs")]
@@ -17,7 +19,12 @@ public class GameData : ScriptableObject
 
     public Sprite[] gameColors;
 
-    public GameObject stepNumber;
+    public GameObject stepNumberPreFab;
+
+    [Header("Materials")]
+    public Material startingPointMaterial;
+    public Material endPointMaterial;
+    public Material markedMaterial;
 
     [Header("Moves")]
     public MoveMgr moveMgr;
