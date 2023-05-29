@@ -13,6 +13,8 @@ public class GameTileCntrl : MonoBehaviour
 
     private GameObject stepTile = null;
 
+    private bool mapped = false;
+
     public void SetColRow(int col, int row)
     {
         Col = col;

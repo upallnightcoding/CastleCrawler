@@ -33,7 +33,7 @@ public class BoardCntrl : MonoBehaviour
 
     private int GetRandom(int n) => Random.Range(0, n);
 
-    private Stack<Stack<GameTileCntrl>> playersMoves = null;
+    private Stack<TrackMove> playersMoves = null;
 
     // Start is called before the first frame update
     void Start()
@@ -44,7 +44,7 @@ public class BoardCntrl : MonoBehaviour
 
         gameBoard = new GameBoard(gameData, boardParent, width, height);
 
-        playersMoves = new Stack<Stack<GameTileCntrl>>();
+        playersMoves = new Stack<TrackMove>();
 
         moveMgr = gameData.moveMgr;
 
@@ -94,7 +94,8 @@ public class BoardCntrl : MonoBehaviour
         if (goodMove) {
             prevTile = gameBoard.GetTileCntrl(currentTile);
             prevTile.CreateStepTile(++moveStep);
-            playersMoves.Push(moveStack);
+
+            playersMoves.Push(new TrackMove(move, moveStack, startMove));
         } else {
             GameManager.Instance.DisplayMsg("Sorry", errorMsg, "Ok");
             currentTile = startMove;
@@ -102,6 +103,7 @@ public class BoardCntrl : MonoBehaviour
             foreach (GameTileCntrl tile in moveStack) 
             {
                 tile.SetMaterial(markedMaterial);
+                tile.SetAsMappedPath();
             }
         }
 
@@ -114,7 +116,11 @@ public class BoardCntrl : MonoBehaviour
 
         if (playersMoves.Count > 0)
         {
-            Stack<GameTileCntrl> move = playersMoves.Pop();
+            TrackMove trackMove = playersMoves.Pop();
+
+            GameManager.Instance.Undo(trackMove.Move);
+
+            Stack<GameTileCntrl> move = trackMove.MoveStack;
 
             foreach(GameTileCntrl tile in move)
             {
@@ -124,9 +130,14 @@ public class BoardCntrl : MonoBehaviour
                 } 
 
                 tile.SetMaterial(markedMaterial);
+                tile.SetAsMappedPath();
             }
 
-            firstTile.RemoveStepTile();         
+            firstTile.RemoveStepTile();
+
+            moveStep--;
+
+            currentTile = trackMove.startMove;
         }
     }
 
@@ -211,11 +222,13 @@ public class BoardCntrl : MonoBehaviour
     {
         public Stack<GameTileCntrl> MoveStack { set; get; }
         public string Move { set; get; }
+        public TileColRow startMove { set; get; }
 
-        public TrackMove(string move, Stack<GameTileCntrl> moveStack)
+        public TrackMove(string move, Stack<GameTileCntrl> moveStack, TileColRow startMove)
         {
             this.Move = move;
             this.MoveStack = moveStack;
+            this.startMove = startMove;
         }
     }
 
