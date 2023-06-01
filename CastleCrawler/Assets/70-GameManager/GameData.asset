@@ -15,7 +15,8 @@ MonoBehaviour:
   width: 10
   height: 10
   tileSpacing: 5
-  level: 6
+  level: 5
+  attemptPercent: 30
   gameTilePreFab: {fileID: 3142403658032675457, guid: 899fc446cbd1fab48a4a63575652e88d, type: 3}
   castlePreFab: {fileID: 2247280935173296445, guid: 80b1e39fac58a8f4a87ab6544bd8c429, type: 3}
   gameColors:
@@ -31,7 +32,7 @@ MonoBehaviour:
   stepNumberPreFab: {fileID: 4912349396815154364, guid: 04328ec20183f6d48b80d775010cf41e, type: 3}
   startingPointMaterial: {fileID: 2100000, guid: 6ba5cf994e88640428ef8c8411eaa814, type: 2}
   endPointMaterial: {fileID: 2100000, guid: b3d0ebecbf592b14a8bc7a77a21274e8, type: 2}
-  markedMaterial: {fileID: 2100000, guid: adf7ad020fe61be4aae8e66c97113eeb, type: 2}
+  openMaterial: {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
   moveMgr:
     moves:
     - N

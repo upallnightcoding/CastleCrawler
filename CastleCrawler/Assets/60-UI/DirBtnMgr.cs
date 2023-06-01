@@ -19,6 +19,18 @@ public class DirBtnMgr : MonoBehaviour
         btnCntrlsDict = new Dictionary<string, DirBtnCntrl>();
     }
 
+    public int GetDirBtnCnt()
+    {
+        int total = 0;
+
+        foreach(var button in btnCntrlsDict)
+        {
+            total += button.Value.GetSelectCount();
+        }
+
+        return (total);
+    }
+
     public void AddDirBtnCnt(string direction)
     {
         if (dirBtnCntDict.TryGetValue(direction, out int count))

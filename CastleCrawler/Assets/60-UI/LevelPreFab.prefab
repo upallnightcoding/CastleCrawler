@@ -274,9 +274,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: '3
-
-'
+  m_text: 0
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 5c5ee151f9307453bad78be36b51a077, type: 2}
   m_sharedMaterial: {fileID: 2517202264660172603, guid: 5c5ee151f9307453bad78be36b51a077, type: 2}
@@ -513,6 +511,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   levelTxt: {fileID: 7106118298803029849}
+  starsWon:
+  - {fileID: 9005831231235106421}
+  - {fileID: 4161815083934953538}
+  - {fileID: 7655074719569022631}
 --- !u!1 &5552887897279077991
 GameObject:
   m_ObjectHideFlags: 0

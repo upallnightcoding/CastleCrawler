@@ -14,6 +14,8 @@ public class DirBtnCntrl : MonoBehaviour
     private Sprite originalSprite;
     private bool disableButton = false;
 
+    public int GetSelectCount() => selectCount;
+
     public void OnPlayersMove() 
     {
         if (!disableButton)
@@ -29,6 +31,8 @@ public class DirBtnCntrl : MonoBehaviour
                     GetComponent<Image>().sprite = buttonDisabled;    
                     disableButton = true;
                 }
+
+                GameManager.Instance.CheckWinner();
             }
         } else {
             GameManager.Instance.DisplayMsg("Sorry", "No more turns for this move.", "Ok");

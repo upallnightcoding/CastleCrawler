@@ -24,11 +24,13 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; set; }
 
+    public bool OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
+    public void OnUndo() => boardCntrl.UnDoLastMove();
+    public void CheckWinner() => boardCntrl.CheckWinner();
+
+    public int GetDirBtnCnt() => uiCntrl.GetDirBtnCnt();
+    public void CreateDirBtns() => uiCntrl.CreateDirBtns();
     public void AddDirBtnCnt(string direction) => uiCntrl.AddDirBtnCnt(direction);
 
-    public void CreateDirBtns() => uiCntrl.CreateDirBtns();
-
-    public bool OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
-
-    public void OnUndo() => boardCntrl.UnDoLastMove();
+    public void WonGame() => uiCntrl.WonGame();
 }

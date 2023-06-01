@@ -6,7 +6,6 @@ public class BoardCntrl : MonoBehaviour
 {
     [SerializeField] private GameData gameData;
     [SerializeField] private Transform boardParent;
-    [SerializeField] private Material markedMaterial;
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material[] stepMaterials;
     //[SerializeField] private Material startingPointMaterial;
@@ -72,10 +71,10 @@ public class BoardCntrl : MonoBehaviour
 
             if (activeTile != null)
             {
-                if (activeTile.OpenForTracking())
+                if (!activeTile.HasBeenPlayed())
                 {
                     activeTile.SetMaterial(stepMaterials[colorSwitch]);
-                    activeTile.SetAsTracked();
+                    activeTile.SetToPlayed();
                     moveStack.Push(activeTile);
                 }
                 else
@@ -92,22 +91,37 @@ public class BoardCntrl : MonoBehaviour
         }
 
         if (goodMove) {
-            prevTile = gameBoard.GetTileCntrl(currentTile);
-            prevTile.CreateStepTile(++moveStep);
-
-            playersMoves.Push(new TrackMove(move, moveStack, startMove));
+            MakeGoodMove(move, moveStack, startMove);
         } else {
             GameManager.Instance.DisplayMsg("Sorry", errorMsg, "Ok");
             currentTile = startMove;
 
             foreach (GameTileCntrl tile in moveStack) 
             {
-                tile.SetMaterial(markedMaterial);
-                tile.SetAsMappedPath();
+                tile.SetToOpen();
             }
         }
 
         return (goodMove);                
+    }
+
+    private void MakeGoodMove(string move, Stack<GameTileCntrl> moveStack, TileColRow startMove)
+    {
+        prevTile = gameBoard.GetTileCntrl(currentTile);
+        prevTile.CreateStepTile(++moveStep);
+
+        playersMoves.Push(new TrackMove(move, moveStack, startMove));
+    }
+
+    public void CheckWinner()
+    {
+        int dirBtnCnt = GameManager.Instance.GetDirBtnCnt();
+
+        if ((dirBtnCnt == 0) && (prevTile.IsCastleTile()))
+        {
+            GameManager.Instance.DisplayMsg("Congradulations", "You Won!", "Ok");
+            GameManager.Instance.WonGame();
+        }
     }
 
     public void UnDoLastMove()
@@ -127,10 +141,9 @@ public class BoardCntrl : MonoBehaviour
                 if (firstTile == null)
                 {
                     firstTile = tile;
-                } 
+                }
 
-                tile.SetMaterial(markedMaterial);
-                tile.SetAsMappedPath();
+                tile.SetToOpen();
             }
 
             firstTile.RemoveStepTile();
@@ -148,6 +161,7 @@ public class BoardCntrl : MonoBehaviour
         
         startingTile = GetStartingPoint();
         startingTile.CreateStepTile(moveStep);
+        startingTile.SetAsGamePath();
         prevTile = startingTile;
         lastTile = null;
 
@@ -156,7 +170,7 @@ public class BoardCntrl : MonoBehaviour
         TileColRow point = startingTile.GetColRow();
 
         GameTileCntrl firstMoveTile = startingTile;         
-        firstMoveTile.SetAsMappedPath();
+        firstMoveTile.SetAsGamePath();
 
         Debug.Log($"Level {level}");
         
@@ -175,7 +189,7 @@ public class BoardCntrl : MonoBehaviour
 
                 GameTileCntrl tileCntrl = gameBoard.GetTileCntrl(point); 
 
-                if ((tileCntrl != null) && (tileCntrl.OpenForMapping()))
+                if ((tileCntrl != null) && (!tileCntrl.IsGamePath()))
                 {
                     stepQueue.Enqueue(tileCntrl);
                     lastTile = tileCntrl;
@@ -193,7 +207,7 @@ public class BoardCntrl : MonoBehaviour
                 while (stepQueue.Count != 0)
                 {
                     GameTileCntrl tileCntrl = stepQueue.Dequeue();
-                    tileCntrl.CreateMappedTile();
+                    tileCntrl.SetAsGamePath();
                 }
             } else {
                 point = moveStartPoint;
@@ -202,10 +216,8 @@ public class BoardCntrl : MonoBehaviour
 
         GameManager.Instance.CreateDirBtns();
 
-        Debug.Log($"Castle {gameData.castlePreFab}");
-        Debug.Log($"Last Tile {lastTile.GetPosition()}");
-
         lastTile.CreateCastleTile();
+        lastTile.SetAsGamePath();
     }
 
     private GameTileCntrl GetStartingPoint()

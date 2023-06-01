@@ -12,6 +12,7 @@ public class GameData : ScriptableObject
     public float tileSpacing;
 
     public int level;
+    public int attemptPercent;
 
     [Header("Game PreFabs")]
     public GameObject gameTilePreFab;
@@ -24,7 +25,7 @@ public class GameData : ScriptableObject
     [Header("Materials")]
     public Material startingPointMaterial;
     public Material endPointMaterial;
-    public Material markedMaterial;
+    public Material openMaterial;
 
     [Header("Moves")]
     public MoveMgr moveMgr;
