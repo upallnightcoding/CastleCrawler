@@ -25,4 +25,6 @@ public class UICntrl : MonoBehaviour
     public int GetDirBtnCnt() => dirBtnMgr.GetDirBtnCnt();
 
     public void WonGame() => levelCntrl.WonGame();
+
+    public void StartNewGame() => dirBtnMgr.StartNewGame();
 }

@@ -14,9 +14,19 @@ public class DirBtnMgr : MonoBehaviour
 
     private void Awake() 
     {
-        moveList = new List<string>();
-        dirBtnCntDict = new Dictionary<string, int>();
-        btnCntrlsDict = new Dictionary<string, DirBtnCntrl>();
+        Init();
+    }
+
+
+    public void StartNewGame()
+    {
+        foreach (string move in moveList)
+        {
+            DirBtnCntrl button = btnCntrlsDict[move];
+            Destroy(button.gameObject);
+        }
+
+        Init();
     }
 
     public int GetDirBtnCnt()
@@ -67,5 +77,12 @@ public class DirBtnMgr : MonoBehaviour
                 btnCntrlsDict[move] = button;
             }       
         }
+    }
+
+    private void Init()
+    {
+        moveList = new List<string>();
+        dirBtnCntDict = new Dictionary<string, int>();
+        btnCntrlsDict = new Dictionary<string, DirBtnCntrl>();
     }
 }

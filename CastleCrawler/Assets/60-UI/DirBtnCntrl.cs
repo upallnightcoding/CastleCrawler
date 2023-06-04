@@ -20,22 +20,22 @@ public class DirBtnCntrl : MonoBehaviour
     {
         if (!disableButton)
         {
-            bool goodMove = GameManager.Instance.OnPlayersMove(directionTxt.text);
+           UpdateButtonCount();
 
-            if (goodMove)
-            {
-                countTxt.text = (--selectCount).ToString();
-
-                if (selectCount == 0) 
-                {
-                    GetComponent<Image>().sprite = buttonDisabled;    
-                    disableButton = true;
-                }
-
-                GameManager.Instance.CheckWinner();
-            }
+           GameManager.Instance.OnPlayersMove(directionTxt.text);
         } else {
             GameManager.Instance.DisplayMsg("Sorry", "No more turns for this move.", "Ok");
+        }
+    }
+
+    private void UpdateButtonCount()
+    {
+        countTxt.text = (--selectCount).ToString();
+
+        if (selectCount == 0)
+        {
+            GetComponent<Image>().sprite = buttonDisabled;
+            disableButton = true;
         }
     }
 

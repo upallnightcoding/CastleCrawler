@@ -10,13 +10,12 @@ public class GameTileCntrl : MonoBehaviour
     public int Row { set; get; }
 
     private TileState state = TileState.OPEN;
-    private TileState revertState = TileState.OPEN;
 
     private GameObject stepTile = null;
 
     private bool gamePath = false;
     private bool bomb = false;
-    private bool castleTile = false;
+    private bool lastTile = false;
 
     public void SetColRow(int col, int row)
     {
@@ -29,18 +28,6 @@ public class GameTileCntrl : MonoBehaviour
         return(new TileColRow(Col, Row));
     }
 
-    public void CreateStartingPointTile() 
-    {
-        SetMaterial(gameData.startingPointMaterial);
-    }
-
-    public void CreateCastleTile()
-    {
-        GameObject go = Instantiate(gameData.castlePreFab, GetPosition(), Quaternion.identity);
-        SetMaterial(gameData.endPointMaterial);
-        castleTile = true;
-    }
-
     public void CreateStepTile(int step) 
     {
         stepTile = Instantiate(gameData.stepNumberPreFab, GetPosition(), Quaternion.identity);
@@ -48,12 +35,31 @@ public class GameTileCntrl : MonoBehaviour
         stepNumberCntrl.SetActive(step);
     }
 
-    public void RemoveStepTile()
+    public void SetStartTile(int level)
     {
-        Destroy(stepTile);
+        CreateStepTile(level);
+        SetAsGamePath();
+        SetMaterial(gameData.startingPointMaterial);
     }
 
-    public void SetMaterial(Material material)
+    public void SetLastTile(int level)
+    {
+        lastTile = true;
+
+        CreateStepTile(level);
+        SetAsGamePath();
+        SetMaterial(gameData.endPointMaterial);
+    }
+
+    public void RemoveStepTile()
+    {
+        if (stepTile != null)
+        {
+            Destroy(stepTile);
+        }
+    }
+
+    private void SetMaterial(Material material)
     {
         transform.GetChild(0).GetComponent<Renderer>().material = material;
     }
@@ -61,7 +67,11 @@ public class GameTileCntrl : MonoBehaviour
     public Vector3 GetPosition() => gameObject.transform.position;
 
     public bool HasBeenPlayed() => (state == TileState.PLAYED);
-    public void SetToPlayed() => state = TileState.PLAYED;
+    public void SetToPlayed(Material material)
+    {
+        state = TileState.PLAYED;
+        SetMaterial(material);
+    }
 
     public bool IsOpen() => (state == TileState.OPEN);
     public void SetToOpen()
@@ -74,8 +84,7 @@ public class GameTileCntrl : MonoBehaviour
     public void SetAsGamePath() => gamePath = true;
 
     public bool IsBomb() => bomb;
-
-    public bool IsCastleTile() => castleTile;
+    public bool IsLastTile() => lastTile;
 
     private enum TileState 
     {

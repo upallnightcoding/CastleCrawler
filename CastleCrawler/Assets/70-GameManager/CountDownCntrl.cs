@@ -9,6 +9,4 @@ public class CountDownCntrl : MonoBehaviour
     [SerializeField] private GameData gameData;
 
     private int count;
-
-
 }

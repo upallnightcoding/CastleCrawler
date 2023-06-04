@@ -16,7 +16,6 @@ public class GameData : ScriptableObject
 
     [Header("Game PreFabs")]
     public GameObject gameTilePreFab;
-    public GameObject castlePreFab;
 
     public Sprite[] gameColors;
 

@@ -13,6 +13,12 @@ public class GameManager : MonoBehaviour
         uiCntrl.DisplayMsg(title, message, buttonTxt);
     }
 
+    public void StartNewGame()
+    {
+        uiCntrl.StartNewGame();
+        boardCntrl.StartNewGame(true);
+    }
+
     private void Awake() 
     {
         Instance = this;    
@@ -24,7 +30,7 @@ public class GameManager : MonoBehaviour
 
     public static GameManager Instance { get; set; }
 
-    public bool OnPlayersMove(string move) => boardCntrl.PlayersMove(move);
+    public void OnPlayersMove(string move) => boardCntrl.OnPlayersMove(move);
     public void OnUndo() => boardCntrl.UnDoLastMove();
     public void CheckWinner() => boardCntrl.CheckWinner();
 

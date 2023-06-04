@@ -8,15 +8,11 @@ public class BoardCntrl : MonoBehaviour
     [SerializeField] private Transform boardParent;
     [SerializeField] private Material blackMaterial;
     [SerializeField] private Material[] stepMaterials;
-    //[SerializeField] private Material startingPointMaterial;
-    //[SerializeField] private Material endPointMaterial;
 
     private int width;
     private int height;
 
     private int level;
-
-    private bool mapSw = false;
 
     private GameBoard gameBoard = null;
 
@@ -27,37 +23,48 @@ public class BoardCntrl : MonoBehaviour
 
     private GameTileCntrl lastTile;
     private GameTileCntrl startingTile;
-    private TileColRow currentTile;
     private GameTileCntrl prevTile;
 
-    private int GetRandom(int n) => Random.Range(0, n);
+    private TileColRow currentTile;
 
     private Stack<TrackMove> playersMoves = null;
 
-    // Start is called before the first frame update
     void Start()
     {
         width = gameData.width;
         height = gameData.height;
         level = gameData.level;
+        moveMgr = gameData.moveMgr;
 
         gameBoard = new GameBoard(gameData, boardParent, width, height);
 
+        StartNewGame(false);
+    }
+
+    public void StartNewGame(bool deleteGameBoard)
+    {
+        if (deleteGameBoard)
+        {
+            gameBoard.DestoryGameBoard();
+        }
+
+        moveStep = 0;
+
         playersMoves = new Stack<TrackMove>();
 
-        moveMgr = gameData.moveMgr;
+        gameBoard.CreateGameBoard();
 
         CreatePuzzle();
 
         GameManager.Instance.SetLevel(level);
     }
 
-    public bool PlayersMove(string move) 
+    public bool OnPlayersMove(string move) 
     {
         Stack<GameTileCntrl> moveStack = new Stack<GameTileCntrl>();
         TileColRow startMove = new TileColRow(currentTile);
-        string errorMsg = "";
         bool goodMove = true;
+        string errorMsg = "";
 
         colorSwitch = 1 - colorSwitch;
 
@@ -73,8 +80,7 @@ public class BoardCntrl : MonoBehaviour
             {
                 if (!activeTile.HasBeenPlayed())
                 {
-                    activeTile.SetMaterial(stepMaterials[colorSwitch]);
-                    activeTile.SetToPlayed();
+                    activeTile.SetToPlayed(stepMaterials[colorSwitch]);
                     moveStack.Push(activeTile);
                 }
                 else
@@ -105,19 +111,28 @@ public class BoardCntrl : MonoBehaviour
         return (goodMove);                
     }
 
-    private void MakeGoodMove(string move, Stack<GameTileCntrl> moveStack, TileColRow startMove)
+    public void MakeGoodMove(string move, Stack<GameTileCntrl> moveStack, TileColRow startMove)
     {
-        prevTile = gameBoard.GetTileCntrl(currentTile);
-        prevTile.CreateStepTile(++moveStep);
+        int dirBtnCnt = GameManager.Instance.GetDirBtnCnt();
 
-        playersMoves.Push(new TrackMove(move, moveStack, startMove));
+        prevTile = gameBoard.GetTileCntrl(currentTile);
+
+        if ((dirBtnCnt == 0) && (prevTile.IsLastTile()))
+        {
+            GameManager.Instance.WonGame();
+            GameManager.Instance.DisplayMsg("Congradulations", "You Won!", "Ok");
+        } else {
+            prevTile.CreateStepTile(++moveStep);
+
+            playersMoves.Push(new TrackMove(move, moveStack, startMove));
+        }
     }
 
     public void CheckWinner()
     {
         int dirBtnCnt = GameManager.Instance.GetDirBtnCnt();
 
-        if ((dirBtnCnt == 0) && (prevTile.IsCastleTile()))
+        if ((dirBtnCnt == 0) && (prevTile.IsLastTile()))
         {
             GameManager.Instance.DisplayMsg("Congradulations", "You Won!", "Ok");
             GameManager.Instance.WonGame();
@@ -160,8 +175,7 @@ public class BoardCntrl : MonoBehaviour
         int tries = 0;
         
         startingTile = GetStartingPoint();
-        startingTile.CreateStepTile(moveStep);
-        startingTile.SetAsGamePath();
+        
         prevTile = startingTile;
         lastTile = null;
 
@@ -172,8 +186,6 @@ public class BoardCntrl : MonoBehaviour
         GameTileCntrl firstMoveTile = startingTile;         
         firstMoveTile.SetAsGamePath();
 
-        Debug.Log($"Level {level}");
-        
         while((numberOfMoves < level) && (tries++ < 20))
         {
             Queue<GameTileCntrl> stepQueue = new Queue<GameTileCntrl>();
@@ -216,18 +228,17 @@ public class BoardCntrl : MonoBehaviour
 
         GameManager.Instance.CreateDirBtns();
 
-        lastTile.CreateCastleTile();
-        lastTile.SetAsGamePath();
+        lastTile.SetLastTile(level);
     }
 
     private GameTileCntrl GetStartingPoint()
     {
         TileColRow colRow = new TileColRow(width / 2, height / 2);
 
-        GameTileCntrl tileCntrl = gameBoard.GetTileCntrl(colRow); 
-        tileCntrl.CreateStartingPointTile();
+        GameTileCntrl tileCntrl = gameBoard.GetTileCntrl(colRow);
+        tileCntrl.SetStartTile(moveStep);
 
-        return(tileCntrl);
+        return (tileCntrl);
     }
 
     private class TrackMove
@@ -267,19 +278,34 @@ public class BoardCntrl : MonoBehaviour
             this.tileSpacing = gameData.tileSpacing;
             this.gameTilePreFab = gameData.gameTilePreFab;
             this.parent = parent;
-
-            gameBoard = new GameTileCntrl[width, height];
-
-            CreateGameBoard();
         }
 
-        private void CreateGameBoard()
+        public void CreateGameBoard()
         {
+            gameBoard = new GameTileCntrl[width, height];
+
             for (int col = 0; col < width; col++) 
             {
                 for (int row = 0; row < height; row++)
                 {
                     gameBoard[col, row] = CreateGameTile(col, row);
+                }
+            }
+        }
+
+        public void DestoryGameBoard()
+        {
+            for (int col = 0; col < width; col++)
+            {
+                for (int row = 0; row < height; row++)
+                {
+                    GameTileCntrl cntrl = gameBoard[col, row];
+
+                    if (cntrl != null)
+                    { 
+                        cntrl.RemoveStepTile();
+                        Destroy(cntrl.gameObject);
+                    }
                 }
             }
         }
